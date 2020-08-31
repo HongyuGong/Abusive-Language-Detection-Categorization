@@ -1,16 +1,13 @@
 This is the TensorFlow implementation of the paper ``Supervised Neural Attention Improves Abusive Language Detection and Categorization''.  
 
+
 Requirements:
 
 1. Python3
 2. Numpy
 3. Sklearn
-4. tweet-preprocessor 
-5. TensorFlow
-6. CMUTweetTagger
-
-1. Files
-src/
+4. TensorFlow
+5. CMUTweetTagger (https://github.com/ianozsvald/ark-tweet-nlp-python). Put CMUTweetTagger.py and CMUTweetTokenizer.py in src/data_util/.
 
 
 Running instructions:
@@ -19,46 +16,47 @@ Running instructions:
 
 (1) Create data folder data/ and dump folder dump/ in the same level of the folder src/.
 (2) Put datasets Anonymized_Sentences_Classified.csv and Anonymized_Comments_Categorized.csv in data/ in the same level of src/.
-(3）Download pre-trained 300d word2vec embedding and save it in dump/.
+(3）Download pre-trained word2vec embedding.
 (4) Tag with CMUTweetTagger
 
 2. Preprocess datasets
 
 ```
-python3 preproc_classification_data.py
+python3 data_util/preproc_classification_data.py
 '''
 
 ```
-python preproc_categorization_data.py
+python data_util/preproc_categorization_data.py
 '''
 
 Build word and part-of-speech tag vocabulary, and word embeddings
 
 ```
-python3 build_vocab_emb.py --embed_fn [EMBED_FN]
+python3 data_util/build_vocab_emb.py --embed_fn [EMBED_FN]
 '''
+
+[EMBED_FN]: the path of downloaded word2vec embedding.
 
 3. Train abusive language classifier
 
-Go to src/abuse_classification/
+```
+CUDA_VISIBLE_DEVICES=0 python3 abuse_classification/train.py
+'''
 
-
-
-* [EMBED_FN]: the path of pre-trained embedding.
-
+Test abusive language classifier
 
 ```
-python3 train.py
+CUDA_VISIBLE_DEVICES=0 python3 abuse_classification/test.py
 '''
 
 4. Train abusive language categorizer
 
-Go to src/abuse_categorization/
-
 ```
-python3 
+CUDA_VISIBLE_DEVICES=0 python3 abuse_categorization/train.py
 '''
 
-=============================== TODO =================================
-1. clean data_util/tag_helpers.py
-2. clean category_data_util.py to data_util/preproc.py
+Test abusive language categorizer
+
+```
+CUDA_VISIBLE_DEVICES=0 python3 abuse_categorization/test.py
+'''
