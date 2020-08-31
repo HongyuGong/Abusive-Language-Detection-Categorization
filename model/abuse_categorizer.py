@@ -5,7 +5,7 @@ import tensorflow as tf
 from tensorflow.contrib.rnn import GRUCell, LSTMCell
 from tensorflow.python.ops.rnn import dynamic_rnn as rnn
 from tensorflow.python.ops.rnn import bidirectional_dynamic_rnn as bi_rnn
-from attention import attention
+from model.attention import attention
 
 
 class AbuseCategorizer(object):
@@ -56,7 +56,7 @@ class AbuseCategorizer(object):
                                         inputs=self.embedded_input, sequence_length=self.sequence_length, \
                                         dtype=tf.float32)
             else:
-                raise Exception(f"Cell tyle {rnn_cell} is not supported!")
+                raise Exception("Cell type {} is not supported!".format(rnn_cell))
             attention_outputs, self.alphas = attention(rnn_outputs, attention_size, return_alphas=True)
             drop_outputs = tf.nn.dropout(attention_outputs, keep_prob)
 

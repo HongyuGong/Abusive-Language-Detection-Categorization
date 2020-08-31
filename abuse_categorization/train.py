@@ -13,7 +13,7 @@ import pickle
 import copy
 from sklearn.metrics import roc_curve, auc, precision_recall_curve
 
-import param
+import data_util.param as param
 from data_util import data_helpers, tag_data_helpers, category_data_helpers
 from model.abuse_categorizer import AbuseCategorizer
 
@@ -28,7 +28,7 @@ tf.flags.DEFINE_integer("pos_embedding_dim", 25, "Dcimensionality of pos tag emb
 tf.flags.DEFINE_float("dropout_keep_prob", 1.0, "Dropout keep probability (default: 0.5)")
 #tf.flags.DEFINE_boolean("use_attention", True, "whether to add supervised attention")
 tf.flags.DEFINE_float("attention_lambda", 0.2, "Supervised attention lambda (default: 0.05)")
-tf.flags.DEFINE_string("attention_loss_type", 'hinge', "loss function of attention")
+tf.flags.DEFINE_string("attention_loss_type", 'encoded', "loss function of attention")
 tf.flags.DEFINE_float("l2_reg_lambda", 0.02, "L2 regularizaion lambda (default: 0.05)")
 tf.flags.DEFINE_integer("hidden_size", 300, "Dimensionality of RNN cell (default: 300)")
 tf.flags.DEFINE_integer("pos_hidden_size", 25, "Dimensionality of POS-RNN cell")
@@ -44,10 +44,12 @@ tf.flags.DEFINE_string("checkpoint", '', "model")
 tf.flags.DEFINE_boolean("allow_soft_placement", True, "Allow device soft device placement")
 tf.flags.DEFINE_boolean("log_device_placement", False, "Log placement of ops on devices")
 FLAGS = tf.flags.FLAGS
+"""
 print("\nParameters:")
 for attr, value in sorted(FLAGS.__flags.items()):
     print("{}={}".format(attr.upper(), value))
 print("")
+"""
 
 # single-/multi-tasking parameters
 if (FLAGS.multitask):
@@ -59,10 +61,10 @@ else:
 
 # -----------------------------  load data  -----------------------------
 vocabulary, pos_vocabulary, init_embed = data_helpers.loadVocabEmb()
-
+pos_vocab_size = len(pos_vocabulary)
 x_train, length_train, attention_train, pos_train, pos_length_train, \
          train_gender_labels, train_race_labels, train_appear_labels, train_idea_labels, \
-         x_dev, length_dev, attention_dev, pos_dev, pos_length_dev \
+         x_dev, length_dev, attention_dev, pos_dev, pos_length_dev, \
          dev_gender_labels, dev_race_labels, dev_appear_labels, dev_idea_labels, \
          = category_data_helpers.loadCategoryTrainData()
 
@@ -74,14 +76,14 @@ with tf.Graph().as_default():
     sess = tf.Session(config=session_conf)
     with sess.as_default():
         model = AbuseCategorizer(
-            max_sequence_length = max_sent_len,
+            max_sequence_length = param.max_sent_len,
             num_classes = 2,
-            pos_vocab_size = FLAGS.pos_vocab_size,
+            pos_vocab_size = pos_vocab_size,
             init_embed = init_embed,
             hidden_size = FLAGS.hidden_size,
             attention_size = FLAGS.attention_size,
             keep_prob = FLAGS.dropout_keep_prob,
-            attention_lambda = attention_lambda,
+            attention_lambda = FLAGS.attention_lambda,
             attention_loss_type = FLAGS.attention_loss_type,
             l2_reg_lambda = FLAGS.l2_reg_lambda,
             use_pos_flag = FLAGS.use_pos_flag,
@@ -98,9 +100,9 @@ with tf.Graph().as_default():
         else:
             out_dir = FLAGS.checkpoint
         if (FLAGS.multitask):
-            checkpoint_dir = os.path.abspath(os.path.join(out_dir, "multitask_attn="+FLAGS.attention_loss_type+"_lambda="+str(attention_lambda)))
+            checkpoint_dir = os.path.abspath(os.path.join(out_dir, "multitask_attn="+FLAGS.attention_loss_type+"_lambda="+str(FLAGS.attention_lambda)))
         else:
-            checkpoint_dir = os.path.abspath(os.path.join(out_dir, "singletask_attn="+FLAGS.attention_loss_type+"_lambda="+str(attention_lambda)))
+            checkpoint_dir = os.path.abspath(os.path.join(out_dir, "singletask_attn="+FLAGS.attention_loss_type+"_lambda="+str(FLAGS.attention_lambda)))
         if not os.path.exists(checkpoint_dir):
             os.makedirs(checkpoint_dir)
         saver = tf.train.Saver(tf.all_variables())
@@ -210,8 +212,8 @@ with tf.Graph().as_default():
             if (current_step% FLAGS.evaluate_every == 0):
                 print("\n Evaluation:")
                 gender_pr_auc, race_pr_auc, appear_pr_auc, idea_pr_auc, avg_loss = \
-                               dev_step(x_test, pos_test, length_test, pos_length_test, attention_test, test_gender_labels, test_race_labels, \
-                                        test_appear_labels, test_idea_labels)
+                               dev_step(x_dev, pos_dev, length_dev, pos_length_dev, attention_dev, dev_gender_labels, dev_race_labels, \
+                                        dev_appear_labels, dev_idea_labels)
                 pr_auc_list = [gender_pr_auc, race_pr_auc, appear_pr_auc, idea_pr_auc]
                 pr_auc = pr_auc_list[FLAGS.primary_label]
                 #if ((not is_multi) and best_auc < pr_auc):

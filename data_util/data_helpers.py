@@ -9,12 +9,11 @@ import codecs
 from collections import Counter
 import csv
 import pickle
-import preprocessor as p
 import sys
 import copy
 
-import param
-import tag_data_helpers
+import data_util.param as param
+from data_util import tag_data_helpers
 
 
 def loadVocabEmb():
@@ -28,7 +27,7 @@ def loadVocabEmb():
     return vocabulary, pos_vocabulary, init_embed
 
 
-def splitData(data, train_ratio=0.8, verbose=True):
+def splitTrainData(data, train_ratio=0.8, verbose=True):
     # split train data into train & dev sets
     data_size = len(data[0])
     groups = len(data)
@@ -45,11 +44,15 @@ def splitData(data, train_ratio=0.8, verbose=True):
                 dev_data[t].append(copy.deepcopy(data[t][ind]))
     if verbose:
         print("split into train ({} examples) and dev sets ({} examples)".format(len(train_data[0]), len(dev_data[0])))
-    return train_data, dev_data
+    return train_data + dev_data
     
 
 def loadData(data_type, verbose=True):
     assert data_type in ["train", "test"]
+    with open(os.path.join(param.dump_folder, "vocab.pkl"), "rb") as handle:
+        vocabulary = pickle.load(handle)
+    with open(os.path.join(param.dump_folder, "pos_vocab.pkl"), "rb") as handle:
+        pos_vocabulary = pickle.load(handle)
     with open(os.path.join(param.dump_folder, data_type+"_comm.data"), "rb") as handle:
         sentences, labels = pickle.load(handle)
     with open(os.path.join(param.dump_folder, data_type+"_comm_pos.data"), "rb") as handle:
@@ -62,7 +65,7 @@ def loadData(data_type, verbose=True):
     y = np.array(labels)
     if verbose:
         print("load {} data, input sent size: {}, input POS size: {}, label size: {}".format(
-            np.array(x).shape, np.array(pos).shape, np.array(y).shape))
+            data_type, np.array(x).shape, np.array(pos).shape, np.array(y).shape))
     return x, length, attention, pos, pos_length, y
 
 

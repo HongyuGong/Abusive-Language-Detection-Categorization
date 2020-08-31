@@ -9,12 +9,12 @@ import codecs
 from collections import Counter
 import csv
 import pickle
-import preprocessor as p
 import sys
+import os
 import copy
+import editdistance
 
-import param
-
+import data_util.param as param
 
 def readCategoryData(fn):
     comment_list = []
@@ -50,7 +50,7 @@ def readCategoryData(fn):
             #comment_list.append(comment)
             category_labels.append((explicit_label[:], generic_label[:], gender_label[:], \
                                     race_label[:], appear_label[:], idea_label[:]))
-    print(f"Comment # for categorization {len(comment_list)}")
+    print("Comment # for categorization {}".format(len(comment_list)))
     return comment_list, category_labels
 
 
@@ -83,7 +83,7 @@ def dumpCategorizationData(fn="Anonymized_Comments_Categorized.csv"):
     category_comments, category_labels = readCategoryData(fn)
     # original data
     train_comments_dict, test_comments_dict, train_map_dict, test_map_dict = readCommentData()
-    print(f"Comment #: {len(train_comments_dict)+len(test_comments_dict)}")
+    print("Comment #: {}".format(len(train_comments_dict)+len(test_comments_dict)))
 
     category_match_dict = dict()
     orig_match_dict = dict()
@@ -149,9 +149,9 @@ def dumpCategorizationData(fn="Anonymized_Comments_Categorized.csv"):
         if (is_match):
             continue
         
-    with open(dump_folder+"category_map.data", "wb") as handle:
+    with open(os.path.join(param.dump_folder, "category_map.data"), "wb") as handle:
         pickle.dump(category_match_dict, handle)
-    with open(dump_folder+"comm_category.data", "wb") as handle:
+    with open(os.path.join(param.dump_folder, "comm_category.data"), "wb") as handle:
         pickle.dump(comm_category_dict, handle)
     print("# of matched category comments:", len(category_match_dict))
     print("# of matched original comments:", len(orig_match_dict))

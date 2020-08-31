@@ -9,7 +9,8 @@ import codecs
 from collections import Counter
 import csv
 import pickle
-import preprocessor as p
+#import preprocessor as p
+import os
 import sys
 import copy
 
@@ -50,8 +51,9 @@ def readRawCommSentData(fn, verbose=True):
         comm_label_list = []
         tmp_sent_list = []
         tmp_label_list = []
+        unlabeled_cnt = 0
         for row in reader:
-            comment_ind, _, sent, _, sent_bullying_label_str, _, _, _, _ = row
+            comment_ind, _, sent, _, sent_bullying_label_str = row
             try:
                 comment_ind = int(comment_ind)
             except:
@@ -67,16 +69,16 @@ def readRawCommSentData(fn, verbose=True):
             elif (sent_bullying_label_str.strip() == "Yes"):
                 sent_label = 1
             else:
-                print("error in sent-level data: label str is neither yes nor no")
-                print("row:", row)
+                print("Missing label in sent: {}".format(row))
+                unlabeled_cnt += 1
                 continue
             if (comment_ind == prev_comment_ind):
                 tmp_sent_list.append(sent)
                 tmp_label_list.append(sent_label)
             else:
                 # store prev comment
-                comm_sent_list.append(tmp_sent_list)
-                comm_label_list.append(tmp_label_list)
+                comm_sent_list.append(tmp_sent_list[:])
+                comm_label_list.append(tmp_label_list[:])
                 # update tmp
                 tmp_sent_list = [sent]
                 tmp_label_list = [sent_label]
@@ -89,7 +91,7 @@ def readRawCommSentData(fn, verbose=True):
         if verbose:
             for i in range(1, 3):
                 print("example comment:", comm_sent_list[-i], "labels:", comm_label_list[-i])
-
+            print("# of unlabeld sents: {}".format(unlabeled_cnt))
         return comm_sent_list, comm_label_list
 
 
@@ -127,16 +129,16 @@ def vectorizeLabel(label_list):
 
 
 def preprocessData(fn, save_fn):
-    print(f"Preprocessing {fn}...")
+    print("Preprocessing {}...".format(fn))
     with open(os.path.join(param.dump_folder, fn), "rb") as handle:
         sent_list, label_list = pickle.load(handle)
-    print(f"Tokenization...")
-    sent_list =  [tok_str(sent) for sent in sent_list]
+    print("Tokenization...")
+    #sent_list =  [tok_str(sent) for sent in sent_list]
     # sent_list: a list of a list of tokens
     sent_list = genTokens(sent_list)
     with open(os.path.join(param.dump_folder, save_fn), "wb") as handle:
         pickle.dump((sent_list, label_list), handle)
-    print(f"Done preprocessing, save to {save_fn}")
+    print("Done preprocessing, save to {}".format(save_fn))
     
 
 def getAnnotatedAttention(sent_fn, map_fn, attention_fn):
@@ -149,7 +151,10 @@ def getAnnotatedAttention(sent_fn, map_fn, attention_fn):
         sent_start_ind, sent_end_ind = map_dict[comm_ind]
         attention_vec = []
         for sent_ind in range(sent_start_ind, sent_end_ind):
-            attention_vec = attention_vec + [sent_label_list[sent_ind][0]] * len(sent_list[sent_ind])
+            try:
+                attention_vec = attention_vec + [sent_label_list[sent_ind][0]] * len(sent_list[sent_ind])
+            except:
+                print("sent_ind: {}, len sent_label_list: {}, len sent_list: {}".format(sent_ind, len(sent_label_list), len(sent_list)))
         attention_list.append(attention_vec[:])
     with open(os.path.join(param.dump_folder, attention_fn), "wb") as handle:
         pickle.dump(attention_list, handle)
@@ -176,7 +181,7 @@ def genTokens(sentences):
 
 
 def genPOSTags(text_path, pos_path, verbose=True):
-    with open(text_path, "rb") as handle:
+    with open(os.path.join(param.dump_folder, text_path), "rb") as handle:
         comment_list, _ = pickle.load(handle)
     pos_comment_list = []
     max_sent_num = 5000
@@ -191,13 +196,13 @@ def genPOSTags(text_path, pos_path, verbose=True):
             pos_list.append(seq[:])
         pos_comment_list = pos_comment_list + pos_list
         ind += max_sent_num
-    with open(pos_path, "wb") as handle:
+    with open(os.path.join(param.dump_folder, pos_path), "wb") as handle:
       pickle.dump(pos_comment_list, handle)
     if verbose:
       print("# pos sequences:", len(pos_comment_list))
       for i in range(3):
         print("example of pos sequence:", pos_comment_list[i])
-      print(f"save pos to {pos_path}")
+      print("save pos to {}".format(pos_path))
   
     
 def dumpClassificationData(fn="Anonymized_Sentences_Classified.csv"):

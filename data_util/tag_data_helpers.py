@@ -1,8 +1,8 @@
 """
 POS tag helpers for model training
 """
-
-import param
+import numpy as np
+import data_util.param as param
 
 def padPOSSents(pos_sentences, max_len, padding_pos=param.pad):
     length_list = []
@@ -26,7 +26,7 @@ def cleanPOSSents(pos_sentences, pos_vocabulary, unk_pos=param.unk):
 
 def genPOSFeatures(pos_sentences, max_sent_len, pos_vocabulary, verbose=True):
     padded_pos_sentences, length_list = padPOSSents(pos_sentences, max_sent_len)
-    cleanPOSSents(padded_pos_sentences)
+    cleanPOSSents(padded_pos_sentences, pos_vocabulary)
     x = np.array([[pos_vocabulary[word] for word in sent] for sent in padded_pos_sentences])
     if verbose:
         print("padded pos sentences:", np.array(padded_pos_sentences).shape)

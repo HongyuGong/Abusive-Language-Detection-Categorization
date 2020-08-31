@@ -10,10 +10,10 @@ import codecs
 from collections import Counter
 import csv
 import pickle
-import preprocessor as p
-from param import *
 import sys
 import copy
+
+import data_util.param as param
 
 
 def buildVocab(sentences, unk=param.unk, pad=param.pad):
@@ -65,24 +65,25 @@ def getInitEmbed(vocabulary, embed_fn, word_limit=50000):
 
 
 def savePOSVocab(data_path, vocab_pkl):
-    with open(train_data_path, "rb") as handle:
-        sent_list, _ = pickle.load(handle)
+    with open(data_path, "rb") as handle:
+        sent_list = pickle.load(handle)
     vocabulary, vocabulary_inv = buildVocab(sent_list)
     with open(vocab_pkl, "wb") as handle:
         pickle.dump(vocabulary, handle)
-    print(f"Vocab size: {len(vocabulary)}, save to {vocab_pkl}")
+    print("Vocab size: {}, save to {}".format(len(vocabulary), vocab_pkl))
+
 
 def saveVocabEmbed(data_path, vocab_pkl, embed_fn, embed_pkl):
-    with open(train_data_path, "rb") as handle:
+    with open(data_path, "rb") as handle:
         sent_list, _ = pickle.load(handle)
     vocabulary, vocabulary_inv = buildVocab(sent_list)
     with open(vocab_pkl, "wb") as handle:
         pickle.dump(vocabulary, handle)
-    print(f"Vocab size: {len(vocabulary)}, save to {vocab_pkl}")
+    print("Vocab size: {}, save to {}".format(len(vocabulary), vocab_pkl))
     init_embed = getInitEmbed(vocabulary, embed_fn)
     with open(embed_pkl, "wb") as handle:
         pickle.dump(init_embed, handle)
-    print("Save embedding to {embed_pkl}")
+    print("Save embedding to {}".format(embed_pkl))
 
 # use only train data!!!
 # change genFeatures: replace test word with unk    
@@ -102,15 +103,16 @@ def normEmbed(embed_pkl, norm_embed_pkl):
     
 if __name__=="__main__":
     parser = argparse.ArgumentParser(description='Prepare vocabulary and embedding.')
-    parse.add_argument('--embed_fn', type=str, default=None, required=True,
+    parser.add_argument('--embed_fn', type=str, default=None, required=True,
                        help='the path of pre-trained embeddings')
     args = parser.parse_args()
     embed_fn = args.embed_fn
     
-    data_path = os.path.join(param.dump_folder, "train_sent.data")
+    data_path = os.path.join(param.dump_folder, "train_comm.data")
     vocab_pkl = os.path.join(param.dump_folder, "vocab.pkl")
     embed_pkl = os.path.join(param.dump_folder, "init_embed.pkl")
     norm_embed_pkl = os.path.join(param.dump_folder, "norm_init_embed.pkl")
+    pos_data_path = os.path.join(param.dump_folder, "train_comm_pos.data")
     pos_vocab_pkl = os.path.join(param.dump_folder, "pos_vocab.pkl")
 
     # word vocab and embed
@@ -118,4 +120,4 @@ if __name__=="__main__":
     normEmbed(embed_pkl, norm_embed_pkl)
     
     # POS vocab
-    savePOSVocab(data_path, pos_vocab_pkl)
+    savePOSVocab(pos_data_path, pos_vocab_pkl)
