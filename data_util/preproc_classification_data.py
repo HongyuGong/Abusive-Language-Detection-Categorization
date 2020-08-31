@@ -13,7 +13,7 @@ import preprocessor as p
 import sys
 import copy
 
-import param
+import data_util.param as param
 import CMUTweetTagger
 import CMUTweetTokenizer
 
