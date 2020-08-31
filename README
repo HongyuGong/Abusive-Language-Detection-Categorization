@@ -1,0 +1,64 @@
+This is the TensorFlow implementation of the paper ``Supervised Neural Attention Improves Abusive Language Detection and Categorization''.  
+
+Requirements:
+
+1. Python3
+2. Numpy
+3. Sklearn
+4. tweet-preprocessor 
+5. TensorFlow
+6. CMUTweetTagger
+
+1. Files
+src/
+
+
+Running instructions:
+
+1. Data preparation
+
+(1) Create data folder data/ and dump folder dump/ in the same level of the folder src/.
+(2) Put datasets Anonymized_Sentences_Classified.csv and Anonymized_Comments_Categorized.csv in data/ in the same level of src/.
+(3）Download pre-trained 300d word2vec embedding and save it in dump/.
+(4) Tag with CMUTweetTagger
+
+2. Preprocess datasets
+
+```
+python3 preproc_classification_data.py
+'''
+
+```
+python preproc_categorization_data.py
+'''
+
+Build word and part-of-speech tag vocabulary, and word embeddings
+
+```
+python3 build_vocab_emb.py --embed_fn [EMBED_FN]
+'''
+
+3. Train abusive language classifier
+
+Go to src/abuse_classification/
+
+
+
+* [EMBED_FN]: the path of pre-trained embedding.
+
+
+```
+python3 train.py
+'''
+
+4. Train abusive language categorizer
+
+Go to src/abuse_categorization/
+
+```
+python3 
+'''
+
+=============================== TODO =================================
+1. clean data_util/tag_helpers.py
+2. clean category_data_util.py to data_util/preproc.py
