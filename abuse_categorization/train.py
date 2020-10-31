@@ -25,7 +25,7 @@ tf.flags.DEFINE_integer("primary_label", 0, "primary label in multitasking (0: g
 tf.flags.DEFINE_integer("embedding_dim", 300, "Dimensionality of character embedding (default: 128)")
 tf.flags.DEFINE_integer("pos_vocab_size", 25, "Vocab size of POS tags")
 tf.flags.DEFINE_integer("pos_embedding_dim", 25, "Dcimensionality of pos tag embedding (default: 20)")
-tf.flags.DEFINE_float("dropout_keep_prob", 1.0, "Dropout keep probability (default: 0.5)")
+tf.flags.DEFINE_float("dropout_keep_prob", 0.99, "Dropout keep probability (default: 0.5)")
 #tf.flags.DEFINE_boolean("use_attention", True, "whether to add supervised attention")
 tf.flags.DEFINE_float("attention_lambda", 0.2, "Supervised attention lambda (default: 0.05)")
 tf.flags.DEFINE_string("attention_loss_type", 'encoded', "loss function of attention")
