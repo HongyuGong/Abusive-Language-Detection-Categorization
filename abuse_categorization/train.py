@@ -36,7 +36,7 @@ tf.flags.DEFINE_integer("attention_size", 20, "Dimensionality of attention schem
 tf.flags.DEFINE_boolean("use_pos_flag", True, "use the sequence of POS tags")
 # Training parameters -- evaluate_every:100
 tf.flags.DEFINE_integer("batch_size", 32, "Batch Size (default: 32)")
-tf.flags.DEFINE_integer("num_epochs", 400, "Number of training epochs (default: 200)")
+tf.flags.DEFINE_integer("num_epochs", 100, "Number of training epochs (default: 200)")
 tf.flags.DEFINE_integer("evaluate_every", 50, "Evaluate model on dev set after this many steps (default: 100)")
 tf.flags.DEFINE_integer("checkpoint_every", 500000, "Save model after this many steps (default: 100)")
 # Misc Parameters
