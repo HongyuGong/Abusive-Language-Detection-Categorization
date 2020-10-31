@@ -7,7 +7,7 @@ classification_dataset = os.path.join(data_folder, "Anonymized_Sentences_Classif
 categorization_dataset = os.path.join(data_folder, "Anonymized_Comments_Categorized.csv")
 
 # hyperparameter
-max_sent_len = 300
+max_sent_len = 100
 unk = "<UNK>"
 pad = "<PAD>"
 
