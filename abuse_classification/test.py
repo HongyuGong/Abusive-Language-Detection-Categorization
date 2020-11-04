@@ -18,7 +18,7 @@ from model.abuse_classifier import AbuseClassifier
 
 # Model Hyperparameters
 tf.flags.DEFINE_integer("embedding_dim", 300, "Dimensionality of character embedding (default: 128)")
-tf.flags.DEFINE_integer("pos_vocab_size", 26, "Vocab size of POS tags")
+tf.flags.DEFINE_integer("pos_vocab_size", 25, "Vocab size of POS tags")
 tf.flags.DEFINE_integer("pos_embedding_dim", 25, "Dimensionality of pos tag embedding (default: 20)")
 tf.flags.DEFINE_float("dropout_keep_prob", 1.0, "Dropout keep probability (default: 0.5)")
 tf.flags.DEFINE_float("attention_lambda", 0.2, "Supervised attention lambda (default: 0.05)")
