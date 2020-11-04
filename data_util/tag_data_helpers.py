@@ -4,7 +4,7 @@ POS tag helpers for model training
 import numpy as np
 import data_util.param as param
 
-def padPOSSents(pos_sentences, max_len, padding_pos=param.pad):
+def padPOSSents(pos_sentences, max_len, padding_pos="<POS/>"):
     length_list = []
     padded_pos_sentences = []
     for i in range(len(pos_sentences)):
