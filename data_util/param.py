@@ -8,8 +8,7 @@ categorization_dataset = os.path.join(data_folder, "Anonymized_Comments_Categori
 
 # hyperparameter
 max_sent_len = 100
-#unk = "<UNK>"
-unk = "<PAD/>"
+unk = "<UNK>"
 pad = "<PAD/>"
 
 
