@@ -17,7 +17,7 @@ import data_util.param as param
 from data_util import data_helpers, tag_data_helpers
 from model.abuse_classifier import AbuseClassifier
 
-tf.set_random_seed(1111)
+tf.set_random_seed(111)
 # Model Hyperparameters
 tf.flags.DEFINE_integer("embedding_dim", 300, "Dimensionality of character embedding (default: 128)")
 tf.flags.DEFINE_integer("pos_vocab_size", 26, "Vocab size of POS tags")
