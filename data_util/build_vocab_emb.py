@@ -12,6 +12,10 @@ import csv
 import pickle
 import sys
 import copy
+from gensim.models import KeyedVectors
+from gensim.models import Word2Vec
+from gensim.models.word2vec import LineSentence
+import time
 
 import data_util.param as param
 
@@ -26,12 +30,35 @@ def buildVocab(sentences, unk=param.unk, pad=param.pad):
   return [vocabulary, vocabulary_inv]
 
 
-def getInitEmbed(vocabulary, embed_fn, word_limit=50000):
+def tuneEmbed(wiki_embed_fn, corpus_fn, tune_embed_fn):
+    sentences = LineSentence(corpus_fn)
+    sent_cnt = 0
+    for sentence in sentences:
+        sent_cnt += 1
+    print("# of sents: {}".format(sent_cnt))
+    model = Word2Vec(
+        sentences, min_count=1, size=param.emb_dim,
+        window=5, iter=5, workers=10
+    )
+    model.intersect_word2vec_format(
+        wiki_embed_fn, lockf=1.0, binary=False
+    )
+    # measure running time
+    start = time.time()
+    model.train(sentences, total_examples=model.corpus_count, epochs=model.iter)
+    end = time.time()
+    print("Done embedding tuning, time used: {}s".format(end-start))
+    word_vectors = model.wv
+    word_vectors.save_word2vec_format(tune_embed_fn)
+    print("Saving embedding to {}".format(tune_embed_fn))
+    
+
+def loadTuneEmbed(vocabulary, embed_fn, word_limit=50000):
   f = open(embed_fn, "r")
   # parameters of word vectors
   header = f.readline()
   vocab_size, dim = np.array(header.strip().split(), "int")
-  print("vector dim:", dim)
+  print("load from {}, vector dim: {}".format(embed_fn, dim))
 
   all_vocab = []
   all_embed_arr = []
@@ -64,29 +91,33 @@ def getInitEmbed(vocabulary, embed_fn, word_limit=50000):
   return init_embed
 
 
-def savePOSVocab(data_path, vocab_pkl):
-    with open(data_path, "rb") as handle:
-        sent_list = pickle.load(handle)
+def savePOSVocab(corpus_path, vocab_pkl):
+    sent_list = []
+    with open(corpus_path, "r") as fin:
+        for line in fin:
+            sent_list.append(line.strip().split())
+    print("# of sents for pos vocab: {}".format(len(sent_list)))
     vocabulary, vocabulary_inv = buildVocab(sent_list)
     with open(vocab_pkl, "wb") as handle:
         pickle.dump(vocabulary, handle)
     print("Vocab size: {}, save to {}".format(len(vocabulary), vocab_pkl))
 
 
-def saveVocabEmbed(data_path, vocab_pkl, embed_fn, embed_pkl):
-    with open(data_path, "rb") as handle:
-        sent_list, _ = pickle.load(handle)
+def saveVocabEmbed(corpus_path, vocab_pkl, embed_fn, embed_pkl):
+    sent_list = []
+    with open(corpus_path, "r") as fin:
+        for line in fin:
+            sent_list.append(line.split())
+    print("# of sents for vocab: {}".format(len(sent_list)))
     vocabulary, vocabulary_inv = buildVocab(sent_list)
     with open(vocab_pkl, "wb") as handle:
         pickle.dump(vocabulary, handle)
     print("Vocab size: {}, save to {}".format(len(vocabulary), vocab_pkl))
-    init_embed = getInitEmbed(vocabulary, embed_fn)
+    init_embed = loadTuneEmbed(vocabulary, embed_fn)
     with open(embed_pkl, "wb") as handle:
         pickle.dump(init_embed, handle)
     print("Save embedding to {}".format(embed_pkl))
 
-# use only train data!!!
-# change genFeatures: replace test word with unk    
 
 def normEmbed(embed_pkl, norm_embed_pkl):
     with open(embed_pkl, "rb") as handle:
@@ -103,21 +134,27 @@ def normEmbed(embed_pkl, norm_embed_pkl):
     
 if __name__=="__main__":
     parser = argparse.ArgumentParser(description='Prepare vocabulary and embedding.')
-    parser.add_argument('--embed_fn', type=str, default=None, required=True,
+    parser.add_argument('--wiki_embed_fn', type=str, default=None, required=True,
                        help='the path of pre-trained embeddings')
     args = parser.parse_args()
-    embed_fn = args.embed_fn
+    wiki_embed_fn = args.wiki_embed_fn
+    corpus_path = os.path.join(param.dump_folder, "corpus.txt")
+    tune_embed_fn = os.path.join(param.dump_folder, "youtube_{}d.txt".format(param.emb_dim))
     
-    data_path = os.path.join(param.dump_folder, "train_comm.data")
     vocab_pkl = os.path.join(param.dump_folder, "vocab.pkl")
     embed_pkl = os.path.join(param.dump_folder, "init_embed.pkl")
     norm_embed_pkl = os.path.join(param.dump_folder, "norm_init_embed.pkl")
-    pos_data_path = os.path.join(param.dump_folder, "train_comm_pos.data")
+    pos_corpus_file = os.path.join(param.dump_folder, "pos_corpus.txt")
+    #pos_data_path = os.path.join(param.dump_folder, "train_comm_pos.data")
     pos_vocab_pkl = os.path.join(param.dump_folder, "pos_vocab.pkl")
 
+    # tune embedding on Youtube corpus
+    tuneEmbed(wiki_embed_fn, corpus_path, tune_embed_fn)
+    
     # word vocab and embed
-    saveVocabEmbed(data_path, vocab_pkl, embed_fn, embed_pkl)
+    saveVocabEmbed(corpus_path, vocab_pkl, tune_embed_fn, embed_pkl)
     normEmbed(embed_pkl, norm_embed_pkl)
     
     # POS vocab
-    savePOSVocab(pos_data_path, pos_vocab_pkl)
+    savePOSVocab(pos_corpus_file, pos_vocab_pkl)
+

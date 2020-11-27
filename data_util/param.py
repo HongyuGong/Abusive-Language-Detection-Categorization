@@ -10,5 +10,5 @@ categorization_dataset = os.path.join(data_folder, "Anonymized_Comments_Categori
 max_sent_len = 100
 unk = "<UNK>"
 pad = "<PAD/>"
-
+emb_dim = 300
 
