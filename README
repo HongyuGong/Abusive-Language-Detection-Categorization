@@ -32,7 +32,7 @@ python data_util/preproc_categorization_data.py
 Build word and part-of-speech tag vocabulary, and word embeddings
 
 ```
-python3 data_util/build_vocab_emb.py --embed_fn [EMBED_FN]
+python3 data_util/build_vocab_emb.py --wiki_embed_fn [EMBED_FN]
 '''
 
 [EMBED_FN]: the path of downloaded word2vec embedding.
