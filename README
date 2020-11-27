@@ -8,6 +8,7 @@ Requirements:
 3. Sklearn
 4. TensorFlow
 5. CMUTweetTagger (https://github.com/ianozsvald/ark-tweet-nlp-python). Put CMUTweetTagger.py and CMUTweetTokenizer.py in src/data_util/.
+6. Preprocess (pip install tweet-preprocessor)
 
 
 Running instructions:
