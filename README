@@ -16,7 +16,7 @@ Running instructions:
 1. Data preparation
 
 (1) Create data folder data/ and dump folder dump/ in the same level of the folder src/.
-(2) Put datasets Anonymized_Sentences_Classified.csv and Anonymized_Comments_Categorized.csv in data/ in the same level of src/.
+(2) Download [datasets](https://drive.google.com/file/d/1uMXTZT8uktOkuff4zdjInxmI2bJatPIk/view?usp=sharing). Put Anonymized_Sentences_Classified.csv and Anonymized_Comments_Categorized.csv in data/ in the same level of src/.
 (3）Download pre-trained word2vec embedding.
 (4) Tag with CMUTweetTagger
 
