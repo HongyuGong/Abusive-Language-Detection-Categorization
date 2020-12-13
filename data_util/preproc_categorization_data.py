@@ -120,48 +120,16 @@ def dumpCategorizationData(fn="Anonymized_Comments_Categorized.csv"):
         if (is_match):
             continue
 
-        # vague match
-        dist_ratio = 0.3
-        for train_comm in train_comments_dict:
-            comm_ind = train_comments_dict[train_comm]
-            if (editdistance.eval(cate_comm, train_comm) < dist_ratio * min(len(cate_comm), len(train_comm))):
-                category_match_dict[cate_comm_ind] = ("train", comm_ind)
-                if (("train", comm_ind) not in orig_match_dict):
-                    orig_match_dict[("train", comm_ind)] = []
-                orig_match_dict[("train", comm_ind)].append(cate_comm_ind)
-                comm_category_dict[("train", comm_ind)] = category_labels[cate_comm_ind]
-                is_match = True
-                match_count += 1
-                break
-        if (is_match):
-            continue
-        for test_comm in test_comments_dict:
-            comm_ind = test_comments_dict[test_comm]
-            if (editdistance.eval(cate_comm, test_comm) < dist_ratio * min(len(cate_comm), len(test_comm))):
-                category_match_dict[cate_comm_ind] = ("test", comm_ind)
-                if (("test", comm_ind) not in orig_match_dict):
-                    orig_match_dict[("test", comm_ind)] = []
-                orig_match_dict[("test", comm_ind)].append(cate_comm_ind)
-                comm_category_dict[("test", comm_ind)] = category_labels[cate_comm_ind]
-                is_match = True
-                match_count += 1
-                break
-        if (is_match):
-            continue
-        
     with open(os.path.join(param.dump_folder, "category_map.data"), "wb") as handle:
         pickle.dump(category_match_dict, handle)
     with open(os.path.join(param.dump_folder, "comm_category.data"), "wb") as handle:
         pickle.dump(comm_category_dict, handle)
     print("# of matched category comments:", len(category_match_dict))
-    print("# of matched original comments:", len(orig_match_dict))
     print("match count:", match_count)
-    print("label count:", len(comm_category_dict))
     
 
 if __name__=="__main__":
     dumpCategorizationData(param.categorization_dataset)
-
 
 
 
