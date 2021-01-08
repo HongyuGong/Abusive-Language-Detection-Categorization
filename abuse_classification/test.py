@@ -117,7 +117,7 @@ def scoreComments(model_path, data_type="test"):
 if __name__=="__main__":
     # locate checkpoint
     if FLAGS.checkpoint == "":
-        out_dir = os.path.abspath(os.path.join(os.path.pardir, "model_stormfront"))
+        out_dir = os.path.abspath(os.path.join(os.path.pardir, "model_stormfront_unique"))
         print("Writing to {}\n".format(out_dir))
     else:
         out_dir = FLAGS.checkpoint
@@ -133,7 +133,7 @@ if __name__=="__main__":
     test_gold_scores, test_pred_scores, test_y, predicted_y = scoreComments(model_path, data_type="test")
 
     # evaluate accuracy
-    test_accuracy =eval_helpers.evalAccuracy(test_y, predicted_y)
+    test_accuracy = eval_helpers.evalAccuracy(test_y, predicted_y)
     # roc auc
     eval_helpers.evalROC(test_gold_scores, test_pred_scores)
     # pr auc

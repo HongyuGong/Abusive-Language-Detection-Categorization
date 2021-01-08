@@ -17,7 +17,7 @@ from gensim.models import Word2Vec
 from gensim.models.word2vec import LineSentence
 import time
 
-import data_util.param as param
+import param as param
 
 
 def buildVocab(sentences, unk=param.unk, pad=param.pad):

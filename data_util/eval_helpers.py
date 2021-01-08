@@ -40,6 +40,29 @@ def evalFscore(train_gold_scores, train_pred_scores, test_gold_scores, test_pred
     print("fscore: {}".format(fscore))
 
 def evalAccuracy(true_y, predicted_y):
-    from sklearn.metrics import accuracy_score
+    from sklearn.metrics import accuracy_score, classification_report
+
+    hateful_correct = 0
+    total_non_hateful = 0
+    non_hateful_correct = 0
+    total_hateful = 0
+
+    for values in zip(true_y, predicted_y):
+        if values[0] == 0:
+            total_non_hateful += 1
+            if values[1] == 0:
+                non_hateful_correct += 1
+        if values[0] == 1:
+            total_hateful += 1
+            if values[1] == 1:
+                hateful_correct += 1
+
+
+    print(classification_report(true_y, predicted_y, target_names=['Not_Hateful', 'Hateful']))
+
+    print(f"Acc_hate = {hateful_correct} / {total_hateful} = {hateful_correct/total_hateful}")
+    print(f"Acc_not_hate = {non_hateful_correct} / {total_non_hateful} = {non_hateful_correct / total_non_hateful}")
+
+
     overall_accuracy = accuracy_score(y_true=true_y, y_pred=predicted_y, normalize=True)
     print("accuracy : {}".format(overall_accuracy))
