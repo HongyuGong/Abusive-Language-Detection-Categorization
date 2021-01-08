@@ -234,14 +234,15 @@ def dumpClassificationData(fn="Anonymized_Sentences_Classified.csv", random_spli
         index = 0
         for label_list in train_label_list:
             try:
-                print(merged_train_comm_list_temp[index])
+                # print(merged_train_comm_list_temp[index])
                 merged_train_label_list.append(np.max(label_list))
                 merged_train_comm_list.append(merged_train_comm_list_temp[index])
             except:
                 print(f"Error occurred for = {merged_train_comm_list_temp[index]}")
             finally:
                 index += 1
-        print(f"The original size = {len(merged_train_comm_list_temp)} and the new size = {len(merged_train_comm_list)}")
+        print(
+            f"The original size = {len(merged_train_comm_list_temp)} and the new size = {len(merged_train_comm_list)}")
         merged_train_label_list = vectorizeLabel(merged_train_label_list)
         with open(os.path.join(param.dump_folder, "raw_train_comm.data"), "wb") as handle:
             pickle.dump((merged_train_comm_list, merged_train_label_list), handle)

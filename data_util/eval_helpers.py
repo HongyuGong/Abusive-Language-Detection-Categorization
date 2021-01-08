@@ -38,3 +38,8 @@ def evalFscore(train_gold_scores, train_pred_scores, test_gold_scores, test_pred
     test_pred_labels = [int(s > threshold) for s in test_pred_scores]
     fscore = f1_score(test_gold_scores, test_pred_labels)
     print("fscore: {}".format(fscore))
+
+def evalAccuracy(true_y, predicted_y):
+    from sklearn.metrics import accuracy_score
+    overall_accuracy = accuracy_score(y_true=true_y, y_pred=predicted_y, normalize=True)
+    print("accuracy : {}".format(overall_accuracy))

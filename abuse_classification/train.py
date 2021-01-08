@@ -82,7 +82,7 @@ with tf.Graph().as_default():
 
         # save models
         if FLAGS.checkpoint == "":
-            out_dir = os.path.abspath(os.path.join(os.path.pardir, "model"))
+            out_dir = os.path.abspath(os.path.join(os.path.pardir, "model_stormfront"))
             print("Writing to {}\n".format(out_dir))
         else:
             out_dir = FLAGS.checkpoint

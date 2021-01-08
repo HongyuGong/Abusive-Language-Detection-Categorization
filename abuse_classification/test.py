@@ -72,6 +72,9 @@ def scoreUtil(init_embed, x_dev, pos_dev, y_dev, length_dev, pos_length_dev, mod
         sess.run(tf.initialize_all_variables())
         saver.restore(sess, model_path)
 
+        true_labels = []
+        predicted_labels = []
+
         dev_scores = []
         pos = 0
         gap = 50
@@ -91,8 +94,10 @@ def scoreUtil(init_embed, x_dev, pos_dev, y_dev, length_dev, pos_length_dev, mod
               model.dropout_keep_prob: 1.0
               }
           step, scores = sess.run([global_step, model.prob], feed_dict)
+          true_labels += [np.argmax(ohe_label) for ohe_label in y_batch]
+          predicted_labels += [np.argmax(predicted_score) for predicted_score in scores]
           dev_scores = dev_scores + list([s[0] for s in scores])
-    return dev_scores
+    return dev_scores, true_labels, predicted_labels
 
 
 def scoreComments(model_path, data_type="test"):
@@ -103,16 +108,16 @@ def scoreComments(model_path, data_type="test"):
     print("pos vocab size: {}".format(len(pos_vocabulary)))
     x_test, length_test, attention_test, pos_test, pos_length_test, y_test = \
             data_helpers.loadData(data_type)
-    test_scores = scoreUtil(init_embed, x_test, pos_test, y_test, \
+    test_scores, true_labels, predicted_labels = scoreUtil(init_embed, x_test, pos_test, y_test, \
                                length_test, pos_length_test, model_path)
     gold_scores = [s[0] for s in y_test]
-    return gold_scores, test_scores
+    return gold_scores, test_scores, true_labels, predicted_labels
 
 
 if __name__=="__main__":
     # locate checkpoint
     if FLAGS.checkpoint == "":
-        out_dir = os.path.abspath(os.path.join(os.path.pardir, "model"))
+        out_dir = os.path.abspath(os.path.join(os.path.pardir, "model_stormfront"))
         print("Writing to {}\n".format(out_dir))
     else:
         out_dir = FLAGS.checkpoint
@@ -123,10 +128,12 @@ if __name__=="__main__":
     model_path = os.path.join(checkpoint_dir, "best_model")
                               
     # evaluate on train data
-    train_gold_scores, train_pred_scores = scoreComments(model_path, data_type="train")
+    train_gold_scores, train_pred_scores, _, _ = scoreComments(model_path, data_type="train")
     # evaluate on test data
-    test_gold_scores, test_pred_scores = scoreComments(model_path, data_type="test")
-    
+    test_gold_scores, test_pred_scores, test_y, predicted_y = scoreComments(model_path, data_type="test")
+
+    # evaluate accuracy
+    test_accuracy =eval_helpers.evalAccuracy(test_y, predicted_y)
     # roc auc
     eval_helpers.evalROC(test_gold_scores, test_pred_scores)
     # pr auc
